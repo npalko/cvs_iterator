@@ -26,7 +26,7 @@ Example:
       // fields of the CSV file. 
   
       auto factory = [] (vector<string> const& fields) {
-        return Wire { stoi(data[0]), data[1], stoi(data[2]) };
+        return Wire { stoi(fields[0]), fields[1], stoi(fields[2]) };
       };
   
       typedef csv::iterator<Wire> Iter;
