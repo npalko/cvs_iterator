@@ -1,12 +1,13 @@
 csv_iterator
 ===
 
+Header only library that provides an iterator interface to CSV files.
 
 Example:
 ---
 
     #include "csv_iterator.hpp"
-    #include <ostream>
+    #include <iostream>
     #include <fstream>
     #include <string>
     #include <vector>
@@ -15,17 +16,23 @@ Example:
     std::ostream& operator<< (std::ostream& os, const Wire& w) {
       return os << w.a << " " << w.b << " " << w.c;
     }
-    struct WireFactory {
-      Wire operator () (const std::vector<std::string>& data) {
-        return Wire {std::stoi(data[0]),data[1],std::stoi(data[2])};
-      }
-    };
 
-    int main() {
-      typedev csv::iterator<Wire,WireFactory> WireIter;
-
-      std::ifstream in("test/resource/mixed.csv");
-      WireIter it(in, WireFactory());
-      std::copy (it, WireIter(), std::ostream_iterator<Wire>(std::cout, "\n"));
+    int main(int argc, char** argv) {
+      using std::string;
+      using std::vector;
+      using std::stoi;
+  
+      // provide a factory to construct the Wire object from the component 
+      // fields of the CSV file. 
+  
+      auto factory = [] (vector<string> const& fields) {
+        return Wire { stoi(data[0]), data[1], stoi(data[2]) };
+      };
+  
+      typedef csv::iterator<Wire> Iter;
+      std::ifstream in ("test/mixed.csv");
+      std::copy(Iter(in, factory),
+                Iter(),
+                std::ostream_iterator<Wire>(std::cout, "\n"));
     }
  
