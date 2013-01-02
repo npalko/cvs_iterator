@@ -17,7 +17,7 @@ Example:
     }
     struct WireFactory {
       Wire operator () (const std::vector<std::string>& data) {
-        return Wire {stoi(data[0]),data[1],stoi(data[2])};
+        return Wire {std::stoi(data[0]),data[1],std::stoi(data[2])};
       }
     };
 
@@ -27,5 +27,5 @@ Example:
       std::ifstream in("test/resource/mixed.csv");
       WireIter it(in, WireFactory());
       std::copy (it, WireIter(), std::ostream_iterator<Wire>(std::cout, "\n"));
-  }
+    }
  
