@@ -8,6 +8,7 @@
 #ifndef CSV_ITERATOR_HPP
 #define CSV_ITERATOR_HPP
 
+#include <functional>
 #include <iterator>
 #include <string>
 #include <sstream>
@@ -16,7 +17,7 @@
 
 namespace csv {
 
-template<class T, class Factory>
+template<typename T>
 class iterator : public std::iterator<
           std::input_iterator_tag,
           T,
@@ -24,14 +25,9 @@ class iterator : public std::iterator<
           T*,
           T&
           > {
- private:
-  std::istream* is_;
-  Factory factory_;
-  char delim_;
-  int skip_;
-  int skipped_;
-  T current_;
  public:
+  typedef std::function<T (std::vector<std::string> const&)> Factory;
+  
   iterator () : is_(nullptr) {}
   iterator (std::istream& is, Factory factory, char delim = ',', int skip = 0)
       : is_(&is),
@@ -84,6 +80,13 @@ class iterator : public std::iterator<
     current_ = factory_ (fields);
     return *this;
   }
+ private:
+  std::istream* is_;
+  Factory factory_;
+  char delim_;
+  int skip_;
+  int skipped_;
+  T current_;
 };
 
 };
