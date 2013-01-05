@@ -14,8 +14,96 @@
 #include <sstream>
 #include <vector>
 
+/*
+
+// getline -- could be early
+// " ",  ,  " """, " \n
+
+  "" '
+
+
+ "" "
+
+
+  push open quote on
+  scan to next " -- if hit \n keep going
+ 
+
+ return *this;
+
+ 
+ 
+
+
+
+*/
 
 namespace csv {
+typedef std::function<T (std::vector<std::string> const&)> Factory;
+
+
+template<typename T>
+class parser {
+ public:
+  parser () :
+  parser (std::istream& is, Factory factory, char delim, int skip)
+      : is_(is),
+        factory_(factory),
+        delim_(delim),
+        skip_(skip) {
+  }
+  bool operator== (parser const& rhs) const {
+    
+  }
+  bool operator!= (parser const& rhs) const {
+    return !((*this) == rhs);
+  }
+  
+ T current () {
+   return current_;
+ }
+ void next () {
+ 
+ 
+   if (is_ == nullptr) {
+     return *this;
+   }
+   if (!is_->good()) {
+     is_ = nullptr;
+     return *this;
+   }
+   
+   std::string line, field;
+   std::vector<std::string> fields;
+   
+   while (skipped_ < skip_) {    // skip over file header
+     std::getline(*is_, line);
+     ++skipped_;
+   }
+   
+   std::getline (*is_, line);
+   std::stringstream linestream(line);
+   while (std::getline (linestream, field, delim_)) {
+     fields.push_back (field);
+   }
+   
+   if (fields.empty()) {         // in the case of an empty file
+     is_ = nullptr;
+     return *this;
+   }
+   
+   current_ = factory_ (fields);
+ }
+ private:
+  std::istream* is_;
+  Factory factory_;
+  char delim_;
+  int skip_;
+  int skipped_;
+  T current_;
+}
+
+
 
 template<typename T>
 class iterator : public std::iterator<
@@ -26,67 +114,29 @@ class iterator : public std::iterator<
           T&
           > {
  public:
-  typedef std::function<T (std::vector<std::string> const&)> Factory;
-  
-  iterator () : is_(nullptr) {}
+  iterator () : parser_(nullptr) {}
   iterator (std::istream& is, Factory factory, char delim = ',', int skip = 0)
-      : is_(&is),
-        factory_(factory),
-        delim_(delim),
-        skip_(skip),
-        skipped_(0) {
+      : parser_(new parser(is, factory, delim, skip)) {
     ++(*this);
   }
   const T& operator* () const {
-    return current_;
+    return parser_->current ();
   }
   const T* operator-> () const {
-    return current_;
+    return parser_->current ();
   }
   bool operator== (iterator const& rhs) {
-    return (is_ == nullptr) && (rhs.is_ == nullptr);
+    return parser_ == rhs.parser_;
   }
   bool operator!= (iterator const& rhs) {
     return !((*this) == rhs);
   }
   iterator& operator++ () {
-    if (is_ == nullptr) {
-      return *this;
-    }
-    if (!is_->good()) {
-      is_ = nullptr;
-      return *this;
-    }
-    
-    std::string line, field;
-    std::vector<std::string> fields;
-    
-    while (skipped_ < skip_) {    // skip over file header 
-      std::getline(*is_, line);
-      ++skipped_;
-    }
-    
-    std::getline (*is_, line);
-    std::stringstream linestream(line);
-    while (std::getline (linestream, field, delim_)) {
-      fields.push_back (field);
-    }
-    
-    if (fields.empty()) {         // in the case of an empty file
-      is_ = nullptr;
-      return *this;
-    }
-    
-    current_ = factory_ (fields);
+    parser_->next ();
     return *this;
   }
  private:
-  std::istream* is_;
-  Factory factory_;
-  char delim_;
-  int skip_;
-  int skipped_;
-  T current_;
+  std::unique_ptr<parser<T>> parser_;
 };
 
 };
