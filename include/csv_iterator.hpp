@@ -34,22 +34,28 @@ class iterator : public std::iterator<
         factory_(factory),
         delim_(delim),
         skip_(skip),
-        skipped_(0) {
+        skipped_(0)
+  {
     ++(*this);
   }
-  const T& operator* () const {
+  const T& operator* () const
+  {
     return current_;
   }
-  const T* operator-> () const {
+  const T* operator-> () const
+  {
     return current_;
   }
-  bool operator== (iterator const& rhs) {
+  bool operator== (iterator const& rhs)
+  {
     return (is_ == nullptr) && (rhs.is_ == nullptr);
   }
-  bool operator!= (iterator const& rhs) {
+  bool operator!= (iterator const& rhs)
+  {
     return !((*this) == rhs);
   }
-  iterator& operator++ () {
+  iterator& operator++ ()
+  {
     if (is_ == nullptr) {
       return *this;
     }
@@ -66,10 +72,10 @@ class iterator : public std::iterator<
       ++skipped_;
     }
     
-    std::getline (*is_, line);
+    std::getline(*is_, line);
     std::stringstream linestream(line);
-    while (std::getline (linestream, field, delim_)) {
-      fields.push_back (field);
+    while (std::getline(linestream, field, delim_)) {
+      fields.push_back(field);
     }
     
     if (fields.empty()) {         // in the case of an empty file
@@ -77,7 +83,7 @@ class iterator : public std::iterator<
       return *this;
     }
     
-    current_ = factory_ (fields);
+    current_ = factory_(fields);
     return *this;
   }
  private:
