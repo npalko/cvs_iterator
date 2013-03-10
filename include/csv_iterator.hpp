@@ -38,22 +38,18 @@ class iterator : public std::iterator<
   {
     ++(*this);
   }
-  const T& operator* () const
-  {
-    return current_;
-  }
-  const T* operator-> () const
-  {
-    return current_;
-  }
+
+  const T& operator*()  const { return current_; }
+
+  const T* operator->() const { return current_; }
+  
   bool operator== (iterator const& rhs)
   {
     return (is_ == nullptr) && (rhs.is_ == nullptr);
   }
-  bool operator!= (iterator const& rhs)
-  {
-    return !((*this) == rhs);
-  }
+
+  bool operator!=(iterator const& rhs) { return !((*this) == rhs); }
+
   iterator& operator++ ()
   {
     if (is_ == nullptr) {
@@ -67,7 +63,8 @@ class iterator : public std::iterator<
     std::string line, field;
     std::vector<std::string> fields;
     
-    while (skipped_ < skip_) {    // skip over file header 
+    // skip over file header 
+    while (skipped_ < skip_) {
       std::getline(*is_, line);
       ++skipped_;
     }
@@ -78,7 +75,8 @@ class iterator : public std::iterator<
       fields.push_back(field);
     }
     
-    if (fields.empty()) {         // in the case of an empty file
+    // in the case of an empty file
+    if (fields.empty()) { 
       is_ = nullptr;
       return *this;
     }
